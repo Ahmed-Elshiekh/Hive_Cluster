@@ -39,21 +39,3 @@ if [ "$(hostname)" == "metastore" ]; then
 
     echo "$(date) Metastore started. Tailing logs..."
     tail -f $HIVE_HOME/logs/metastore.log
-    
-elif [[ "$(hostname)" =~ ^hive-[0-9]+ ]]; then
-    echo "$(date) This is a HiveServer2 container ($(hostname)). Waiting for Hadoop services..."
-    until hdfs dfs -ls / &>/dev/null; do
-        echo "$(date) Waiting for HDFS to become available..."
-        sleep 10
-    done
-    
-    echo "$(date) HDFS is available. Waiting for metastore..."
-    sleep 30
-
-    echo "$(date) Starting HiveServer2 on $(hostname)..."
-    mkdir -p $HIVE_HOME/logs
-    hive --service hiveserver2 > $HIVE_HOME/logs/hiveserver2.log 2>&1
-else
-    echo "$(date) Unknown container role: $(hostname). Running shell to debug."
-    /bin/bash
-fi
