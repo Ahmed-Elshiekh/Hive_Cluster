@@ -24,3 +24,7 @@ ENV HIVE_HOME=/hive \
     TEZ_JARS=/tez/:/tez/lib/ \
     HADOOP_CLASSPATH=$HADOOP_HOME/lib/:/hive/lib/:/tez/lib/ \
     PATH=$PATH:$JAVA_HOME/bin:$HADOOP_HOME/bin:$HADOOP_HOME/sbin:/zookeeper-3.5.9/bin:/hive/bin:/tez/bin
+
+COPY hive-site.xml /hive/conf/
+COPY tez-site.xml /tez/conf/
+COPY hive.sh /
