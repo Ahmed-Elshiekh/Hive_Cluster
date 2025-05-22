@@ -1,0 +1,2 @@
+FROM hadoop
+USER root
