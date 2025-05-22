@@ -28,3 +28,7 @@ ENV HIVE_HOME=/hive \
 COPY hive-site.xml /hive/conf/
 COPY tez-site.xml /tez/conf/
 COPY hive.sh /
+
+RUN chmod +x /hive.sh
+
+ENTRYPOINT [ "/hive.sh" ]
