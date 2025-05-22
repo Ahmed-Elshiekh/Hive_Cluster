@@ -1,0 +1,24 @@
+<configuration>
+    
+    <property>
+        <name>tez.use.cluster.hadoop-libs</name>
+        <value>true</value>
+    </property>
+    <property>
+    <name>tez.am.resource.memory.mb</name>
+    <value>1024</value>
+  </property>
+  <property>
+    <name>tez.lib.uris</name>
+    <value>hdfs:///apps/tez/tez.tar.gz</value>
+  </property>
+    <property>
+        <name>hive.tez.container.size</name>
+        <value>2048</value>
+    </property>
+    <property>
+        <name>hive.tez.cpu.vcores</name>
+        <value>2</value>
+    </property>
+	
+</configuration>

@@ -1,0 +1,109 @@
+version: '3.8'
+
+services:
+  master1:
+    image: hadoop
+    hostname: master1
+    container_name: master1
+    ports:
+      - "8887:8088"
+      - "9877:9870"
+    networks:
+      - hadoopnetwork
+    command: bash /start.sh
+    healthcheck:
+      test: ["CMD-SHELL", "hdfs haadmin -checkHealth nn1"]
+      interval: 30s
+      timeout: 20s
+      retries: 5
+      start_period: 1m
+
+  master2:
+    image: hadoop
+    hostname: master2
+    container_name: master2
+    ports:
+      - "8886:8088"
+      - "9876:9870"
+    networks:
+      - hadoopnetwork
+    command: bash /start.sh
+
+  master3:
+    image: hadoop
+    hostname: master3
+    container_name: master3
+    ports:
+      - "8885:8088"
+      - "9875:9870"
+    networks:
+      - hadoopnetwork
+    command: bash /start.sh
+
+  worker1:
+    image: hadoop
+    hostname: worker1
+    container_name: worker1
+    networks:
+      - hadoopnetwork
+    command: bash /start.sh
+
+  hive-server:
+    image: hive_cluster:1.0
+    hostname: hiveserver
+    container_name: hiveserver
+    ports:
+      - "10000:10000"
+      - "10002:10002"
+     
+    networks:
+      - hadoopnetwork
+    depends_on:
+      - metastore
+    entrypoint: bash -c "sleep 10 && hive --service hiveserver2"
+
+  metastore:
+    image: hive_cluster:1.0
+    hostname: metastore
+    container_name: metastore
+    # ports:
+    #   - "9083:9083"
+
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - hadoopnetwork
+    depends_on:
+      master1:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    entrypoint: bash -c "sleep 20 && schematool -dbType postgres -initSchema --verbose || echo 'already exists' && hive --service metastore"
+
+  postgres:
+    image: postgres:13
+    container_name: postgres
+    hostname: postgres
+    environment:
+      POSTGRES_USER: hive
+      POSTGRES_PASSWORD: hive
+      POSTGRES_DB: hive_metastore
+    networks:
+      - hadoopnetwork
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hive -d hive_metastore"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+volumes:
+  postgres_data:
+
+networks:
+  hadoopnetwork:
+    driver: bridge
